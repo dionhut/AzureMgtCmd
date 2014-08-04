@@ -73,7 +73,7 @@ namespace AzureMgtCmd
             }
         }
 
-        public static void Create(string subscriptionId, string base64EncodedCert, string serviceName, string packageUrl, string configPath)
+        public static void Create(string subscriptionId, string base64EncodedCert, string serviceName, string label, string packageUrl, string configPath)
         {
             ComputeManagementClient client = new ComputeManagementClient(GetCredentials(subscriptionId, base64EncodedCert));
 
@@ -82,7 +82,7 @@ namespace AzureMgtCmd
             var res = client.Deployments.Create(serviceName, slot, new DeploymentCreateParameters()
             {
                 Name = Guid.NewGuid().ToString(),
-                Label = serviceName,
+                Label = label,
                 Configuration = File.ReadAllText(configPath),
                 PackageUri = new Uri(packageUrl),
                 StartDeployment = true

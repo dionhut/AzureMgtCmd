@@ -11,7 +11,7 @@ namespace AzureMgtCmd
     class Program
     {
         private const int UPLOAD_FILES_ARG_CNT = 5;
-        private const int CREATE_CS_ARG_CNT = 4;
+        private const int CREATE_CS_ARG_CNT = 5;
         private const int WAIT_CS_ARG_CNT = 3;
         private const int SWAP_CS_ARG_CNT = 2;
         private const int DELETE_CS_ARG_CNT = 3;
@@ -76,6 +76,7 @@ namespace AzureMgtCmd
                         GetArgValue(args, "--subscriptionid"),
                         GetSubscriptionCert(GetArgValue(args, "--subscriptionid")),
                         GetArgValue(args, "--service"),
+                        GetArgValue(args, "--label"),
                         GetArgValue(args, "--package-url"),
                         GetArgValue(args, "--config-path"));
                 }
@@ -179,7 +180,7 @@ namespace AzureMgtCmd
             Console.WriteLine(string.Format("Azure Management Tool {0}", Assembly.GetExecutingAssembly().GetName().Version));
             Console.WriteLine(string.Format("usage:"));
             Console.WriteLine(string.Format("AzureMgtCmd upload-files --acount --key --container --path --filename"));
-            Console.WriteLine(string.Format("AzureMgtCmd create-cs --subscriptionid --service --package-url --config-path"));
+            Console.WriteLine(string.Format("AzureMgtCmd create-cs --subscriptionid --service --label --package-url --config-path"));
             Console.WriteLine(string.Format("AzureMgtCmd wait-csready --subscriptionid --service --slot"));
             Console.WriteLine(string.Format("AzureMgtCmd swap-cs --subscriptionid --service"));
             Console.WriteLine(string.Format("AzureMgtCmd delete-cs --subscriptionid --service --slot"));
