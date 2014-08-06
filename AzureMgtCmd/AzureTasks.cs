@@ -9,6 +9,7 @@ using Microsoft.WindowsAzure.Management.Compute.Models;
 using System.Threading;
 using System.IO;
 using System.Net.Http;
+using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace AzureMgtCmd
 {
@@ -154,7 +155,7 @@ namespace AzureMgtCmd
         public static void UploadFilesToBlobStorage(string accountName, string secret, string containerName, string path, string fileNames)
         {
             var account = new Microsoft.WindowsAzure.Storage.CloudStorageAccount(
-                new Microsoft.WindowsAzure.Storage.Auth.StorageCredentials(accountName, secret), false);
+                new Microsoft.WindowsAzure.Storage.Auth.StorageCredentials(accountName, secret), true);
 
             var client = account.CreateCloudBlobClient();
 
@@ -180,6 +181,29 @@ namespace AzureMgtCmd
 
                 Console.WriteLine(string.Format("Successfully uploaded {0}", item));
             }
+        }
+
+        public static void DownloadBlob(string accountName, string secret, string containerName, string destPath, string fileName)
+        {
+            var account = new Microsoft.WindowsAzure.Storage.CloudStorageAccount(
+                new Microsoft.WindowsAzure.Storage.Auth.StorageCredentials(accountName, secret), true);
+
+            var client = account.CreateCloudBlobClient();
+
+            var container = client.GetContainerReference(containerName);
+
+            // Retrieve reference to a blob named "photo1.jpg".
+            var blob = container.GetBlockBlobReference(fileName);
+
+            var path = destPath + (destPath.Last() == '\\' ? "" : "\\" + fileName);
+
+            // Save blob contents to a file.
+            using (var fileStream = System.IO.File.OpenWrite(path))
+            {
+                blob.DownloadToStream(fileStream);
+            }
+
+            Console.WriteLine(string.Format("Successfully downloaded {0}", path));
         }
     }
 }

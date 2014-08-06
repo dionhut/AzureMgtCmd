@@ -11,6 +11,7 @@ namespace AzureMgtCmd
     class Program
     {
         private const int UPLOAD_FILES_ARG_CNT = 5;
+        private const int DOWNLOAD_FILE_ARG_CNT = 5;
         private const int CREATE_CS_ARG_CNT = 5;
         private const int WAIT_CS_ARG_CNT = 3;
         private const int SWAP_CS_ARG_CNT = 2;
@@ -50,7 +51,7 @@ namespace AzureMgtCmd
                 try
                 {    
                     CloudServiceTasks.UploadFilesToBlobStorage(
-                        GetArgValue(args, "--acount"),
+                        GetArgValue(args, "--account"),
                         GetArgValue(args, "--key"),
                         GetArgValue(args, "--container"),
                         GetArgValue(args, "--path"),
@@ -61,7 +62,30 @@ namespace AzureMgtCmd
                     Console.WriteLine(string.Format("Failed to upload file {0}", ex.Message));
                 }
             }
-            else if(args[0] == "create-cs")
+            else if (args[0] == "download-file")
+            {
+                if (args.Count() != 1 + (DOWNLOAD_FILE_ARG_CNT * 2))
+                {
+                    Console.WriteLine("Invalid args");
+                    WriteUsage();
+                    return;
+                }
+
+                try
+                {
+                    CloudServiceTasks.DownloadBlob(
+                        GetArgValue(args, "--account"),
+                        GetArgValue(args, "--key"),
+                        GetArgValue(args, "--container"),
+                        GetArgValue(args, "--dest-path"),
+                        GetArgValue(args, "--filename"));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(string.Format("Failed to download file {0}", ex.Message));
+                }
+            }
+            else if (args[0] == "create-cs")
             {
                 if (args.Count() != 1 + (CREATE_CS_ARG_CNT * 2))
                 {
@@ -179,7 +203,8 @@ namespace AzureMgtCmd
         {
             Console.WriteLine(string.Format("Azure Management Tool {0}", Assembly.GetExecutingAssembly().GetName().Version));
             Console.WriteLine(string.Format("usage:"));
-            Console.WriteLine(string.Format("AzureMgtCmd upload-files --acount --key --container --path --filename"));
+            Console.WriteLine(string.Format("AzureMgtCmd upload-files --account --key --container --path --filename"));
+            Console.WriteLine(string.Format("AzureMgtCmd download-file --account --key --container --dest-path --filename"));
             Console.WriteLine(string.Format("AzureMgtCmd create-cs --subscriptionid --service --label --package-url --config-path"));
             Console.WriteLine(string.Format("AzureMgtCmd wait-csready --subscriptionid --service --slot"));
             Console.WriteLine(string.Format("AzureMgtCmd swap-cs --subscriptionid --service"));
