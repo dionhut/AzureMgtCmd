@@ -1,7 +1,7 @@
 AzureMgtCmd
 ===========
 
-A Command line tool that wraps Azure Management Libraries.  Currently there are only a few Azure management tasks enabled.  Uploading files to a blob storage container and managing cloud service deployments.
+A Command line tool that wraps Azure Management Libraries.  Currently there are only a few Azure management tasks enabled.
 
 This is great for the use I intended it for which is promoting packages and deploying packages from a Jenkins build job.  I prefered using .NET management libraries over PowerShell where setting up credentials is less ideal for Jenkins jobs.
 
@@ -15,6 +15,15 @@ upload-files --acount --key --container --path --filename
 - `--container` Container Name
 - `--path` Path to file(s) you want to upload to blob storage
 - `--filename` Can be a filename or filespec like `*.*` or `*.txt`
+
+```
+download-file --acount --key --container --dest-path --filename
+```
+- `--account` Storage Account Name
+- `--key` Access Key
+- `--container` Container Name
+- `--dest-path` Directory to download file to
+- `--filename` The filename of the blob in the specified container
 
 ```
 create-cs --subscriptionid --service --package-url --config-path
@@ -42,6 +51,13 @@ delete-cs --subscriptionid --service --slot
 - `--subscriptionid` Azure Subscription Id
 - `--service` Cloud Service Name
 - `--slot` The deployment slot you want to delete.  Normally this would `Staging` which is the old `Production` after you swaped.
+
+```
+get-csurl --subscriptionid --service --slot
+```
+- `--subscriptionid` Azure Subscription Id
+- `--service` Cloud Service Name
+- `--slot` The deployment slot.  Typically this would `Staging` which changes each deployment.
 
 Notes
 ---

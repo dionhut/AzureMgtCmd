@@ -44,20 +44,7 @@ namespace AzureMgtCmd
         {
             ComputeManagementClient client = new ComputeManagementClient(GetCredentials(subscriptionId, base64EncodedCert));
 
-            DeploymentSlot slot = DeploymentSlot.Staging;
-            switch (slotName)
-            {
-                case "Staging":
-                    slot = DeploymentSlot.Staging;
-                    break;
-
-                case "Production":
-                    slot = DeploymentSlot.Production;
-                    break;
-
-                default:
-                    throw new Exception(string.Format("Invalid slotName: {0}", slotName));
-            }
+            DeploymentSlot slot = GetDeploymentSlot(slotName);
 
             try
             {
@@ -100,20 +87,7 @@ namespace AzureMgtCmd
         {
             ComputeManagementClient client = new ComputeManagementClient(GetCredentials(subscriptionId, base64EncodedCert));
 
-            DeploymentSlot slot = DeploymentSlot.Staging;
-            switch (slotName)
-            {
-                case "Staging":
-                    slot = DeploymentSlot.Staging;
-                    break;
-
-                case "Production":
-                    slot = DeploymentSlot.Production;
-                    break;
-
-                default:
-                    throw new Exception(string.Format("Invalid slotName: {0}", slotName));
-            }
+            DeploymentSlot slot = GetDeploymentSlot(slotName);
 
             var res = client.Deployments.GetBySlot(serviceName, slot);
 
@@ -204,6 +178,32 @@ namespace AzureMgtCmd
             }
 
             Console.WriteLine(string.Format("Successfully downloaded {0}", path));
+        }
+
+        public static string GetServiceUrl(string subscriptionId, string base64EncodedCert, string serviceName, string slotName)
+        {
+            ComputeManagementClient client = new ComputeManagementClient(GetCredentials(subscriptionId, base64EncodedCert));
+
+            DeploymentSlot slot = GetDeploymentSlot(slotName);
+
+            var res = client.Deployments.GetBySlot(serviceName, slot);
+
+            return res.Uri.ToString();
+        }
+
+        private static DeploymentSlot GetDeploymentSlot(string slotName)
+        {
+            switch (slotName)
+            {
+                case "Staging":
+                    return DeploymentSlot.Staging;
+
+                case "Production":
+                    return DeploymentSlot.Production;
+
+                default:
+                    throw new Exception(string.Format("Invalid slotName: {0}", slotName));
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ namespace AzureMgtCmd
         private const int WAIT_CS_ARG_CNT = 3;
         private const int SWAP_CS_ARG_CNT = 2;
         private const int DELETE_CS_ARG_CNT = 3;
+        private const int GET_CSURL_ARG_CNT = 3;
 
         static string GetArgValue(string[] args, string key)
         {
@@ -32,12 +33,12 @@ namespace AzureMgtCmd
             return result;
         }
 
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
             if(args.Count() == 0 || args[0] == "help")
             {
                 WriteUsage();
-                return;
+                return 0;
             }
             else if(args[0] == "upload-files" )
             {
@@ -45,7 +46,7 @@ namespace AzureMgtCmd
                 {
                     Console.WriteLine("Invalid args");
                     WriteUsage();
-                    return;
+                    return 1;
                 }
 
                 try
@@ -60,6 +61,7 @@ namespace AzureMgtCmd
                 catch (Exception ex)
                 {
                     Console.WriteLine(string.Format("Failed to upload file {0}", ex.Message));
+                    return 1;
                 }
             }
             else if (args[0] == "download-file")
@@ -68,7 +70,7 @@ namespace AzureMgtCmd
                 {
                     Console.WriteLine("Invalid args");
                     WriteUsage();
-                    return;
+                    return 1;
                 }
 
                 try
@@ -83,6 +85,7 @@ namespace AzureMgtCmd
                 catch (Exception ex)
                 {
                     Console.WriteLine(string.Format("Failed to download file {0}", ex.Message));
+                    return 1;
                 }
             }
             else if (args[0] == "create-cs")
@@ -91,7 +94,7 @@ namespace AzureMgtCmd
                 {
                     Console.WriteLine("Invalid args");
                     WriteUsage();
-                    return;
+                    return 1;
                 }
 
                 try
@@ -107,6 +110,7 @@ namespace AzureMgtCmd
                 catch (Exception ex)
                 {
                     Console.WriteLine(string.Format("Failed to create cloud service {0}", ex.Message));
+                    return 1;
                 }
             }
             else if (args[0] == "wait-csready")
@@ -115,7 +119,7 @@ namespace AzureMgtCmd
                 {
                     Console.WriteLine("Invalid args");
                     WriteUsage();
-                    return;
+                    return 1;
                 }
 
                 try
@@ -129,6 +133,7 @@ namespace AzureMgtCmd
                 catch (Exception ex)
                 {
                     Console.WriteLine(string.Format("Failed to wait for cloud service ready {0}", ex.Message));
+                    return 1;
                 }
             }
             else if (args[0] == "swap-cs")
@@ -137,7 +142,7 @@ namespace AzureMgtCmd
                 {
                     Console.WriteLine("Invalid args");
                     WriteUsage();
-                    return;
+                    return 1;
                 }
 
                 try
@@ -150,6 +155,7 @@ namespace AzureMgtCmd
                 catch (Exception ex)
                 {
                     Console.WriteLine(string.Format("Failed to swap cloud service {0}", ex.Message));
+                    return 1;
                 }
             }
             else if (args[0] == "delete-cs")
@@ -158,7 +164,7 @@ namespace AzureMgtCmd
                 {
                     Console.WriteLine("Invalid args");
                     WriteUsage();
-                    return;
+                    return 1;
                 }
 
                 try
@@ -172,8 +178,34 @@ namespace AzureMgtCmd
                 catch (Exception ex)
                 {
                     Console.WriteLine(string.Format("Failed to delete cloud service {0}", ex.Message));
+                    return 1;
                 }
             }
+            else if (args[0] == "get-csurl")
+            {
+                if (args.Count() != 1 + (GET_CSURL_ARG_CNT * 2))
+                {
+                    Console.WriteLine("Invalid args");
+                    WriteUsage();
+                    return 1;
+                }
+
+                try
+                {
+                    Console.WriteLine(CloudServiceTasks.GetServiceUrl(
+                        GetArgValue(args, "--subscriptionid"),
+                        GetSubscriptionCert(GetArgValue(args, "--subscriptionid")),
+                        GetArgValue(args, "--service"),
+                        GetArgValue(args, "--slot")));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(string.Format("Failed to get cloud service url {0}", ex.Message));
+                    return 1;
+                }
+            }
+
+            return 0;
         }
 
         static string GetSubscriptionCert(string subscriptionId)
@@ -182,8 +214,6 @@ namespace AzureMgtCmd
             var files = System.IO.Directory.EnumerateFiles(".", "*.publishsettings").ToList();
             foreach (var item in files)
             {
-                Console.WriteLine(string.Format("publishsettings file {0}", item));
-
                 XElement xml = XElement.Load(item);
                 foreach (XElement x in xml.Elements("PublishProfile").Elements("Subscription"))
                 {
@@ -209,6 +239,7 @@ namespace AzureMgtCmd
             Console.WriteLine(string.Format("AzureMgtCmd wait-csready --subscriptionid --service --slot"));
             Console.WriteLine(string.Format("AzureMgtCmd swap-cs --subscriptionid --service"));
             Console.WriteLine(string.Format("AzureMgtCmd delete-cs --subscriptionid --service --slot"));
+            Console.WriteLine(string.Format("AzureMgtCmd get-csurl --subscriptionid --service --slot"));
         }
     }
 }
