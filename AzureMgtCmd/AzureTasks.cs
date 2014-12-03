@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Management.Compute;
@@ -83,46 +84,13 @@ namespace AzureMgtCmd
             }
         }
 
-        public static void WaitForReady(string subscriptionId, string base64EncodedCert, string serviceName, string slotName)
+        public static void WaitForReady(string subscriptionId, string base64EncodedCert, string serviceName, string slotName, TimeSpan waitTime)
         {
-            ComputeManagementClient client = new ComputeManagementClient(GetCredentials(subscriptionId, base64EncodedCert));
+            var task = Task.Factory.StartNew(() => WaitForReadyImpl(subscriptionId, base64EncodedCert, serviceName, slotName));
 
-            DeploymentSlot slot = GetDeploymentSlot(slotName);
-
-            var res = client.Deployments.GetBySlot(serviceName, slot);
-
-            bool ready = false;
-            while (!ready)
+            if (!task.Wait(waitTime))
             {
-                int readyInstances = 0;
-                foreach (var item in res.RoleInstances)
-                {
-                    Console.WriteLine(string.Format("Instance name:{0} State:{1}", item.InstanceName, item.InstanceStatus));
-
-                    if (item.InstanceStatus == "ReadyRole")
-                    {
-                        readyInstances++;
-                    }
-
-                    if (readyInstances >= res.RoleInstances.Count)
-                    {
-                        Console.WriteLine("All role instances ready!");
-                        ready = true;
-                    }
-                }
-
-                Thread.Sleep(5000);
-
-				res = client.Deployments.GetBySlot(serviceName, slot);
-			}
-
-            // Warm up WebApp
-            HttpClient http = new HttpClient();
-            var response = http.GetAsync(res.Uri);
-            while (!response.IsCompleted)
-            {
-                Console.WriteLine("Waiting for warm up to complete.");
-                Thread.Sleep(5000);
+                throw new TimeoutException(string.Format("The Task timed out in {0} minutes!", waitTime.TotalMinutes));
             }
         }
 
@@ -203,6 +171,49 @@ namespace AzureMgtCmd
 
                 default:
                     throw new Exception(string.Format("Invalid slotName: {0}", slotName));
+            }
+        }
+
+        private static void WaitForReadyImpl(string subscriptionId, string base64EncodedCert, string serviceName, string slotName)
+        {
+            ComputeManagementClient client = new ComputeManagementClient(GetCredentials(subscriptionId, base64EncodedCert));
+
+            DeploymentSlot slot = GetDeploymentSlot(slotName);
+
+            var res = client.Deployments.GetBySlot(serviceName, slot);
+
+            bool ready = false;
+            while (!ready)
+            {
+                int readyInstances = 0;
+                foreach (var item in res.RoleInstances)
+                {
+                    Console.WriteLine(string.Format("Instance name:{0} State:{1}", item.InstanceName, item.InstanceStatus));
+
+                    if (item.InstanceStatus == "ReadyRole")
+                    {
+                        readyInstances++;
+                    }
+
+                    if (readyInstances >= res.RoleInstances.Count)
+                    {
+                        Console.WriteLine("All role instances ready!");
+                        ready = true;
+                    }
+                }
+
+                Thread.Sleep(5000);
+
+                res = client.Deployments.GetBySlot(serviceName, slot);
+            }
+
+            // Warm up WebApp
+            HttpClient http = new HttpClient();
+            var response = http.GetAsync(res.Uri);
+            while (!response.IsCompleted)
+            {
+                Console.WriteLine("Waiting for warm up to complete.");
+                Thread.Sleep(5000);
             }
         }
     }

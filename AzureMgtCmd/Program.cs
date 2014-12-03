@@ -128,7 +128,8 @@ namespace AzureMgtCmd
                         GetArgValue(args, "--subscriptionid"),
                         GetSubscriptionCert(GetArgValue(args, "--subscriptionid")),
                         GetArgValue(args, "--service"),
-                        GetArgValue(args, "--slot"));
+                        GetArgValue(args, "--slot"),
+                        TimeSpan.FromMinutes(5));
                 }
                 catch (Exception ex)
                 {
