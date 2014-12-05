@@ -84,13 +84,20 @@ namespace AzureMgtCmd
             }
         }
 
-        public static void WaitForReady(string subscriptionId, string base64EncodedCert, string serviceName, string slotName, TimeSpan waitTime)
+        public static void WaitForReady(string subscriptionId, string base64EncodedCert, string serviceName, string slotName, string waitTime)
         {
+            TimeSpan timeout = TimeSpan.FromMinutes(30);
+            int temp;
+
+            if (!string.IsNullOrWhiteSpace(waitTime) && int.TryParse(waitTime,out temp) && temp > 0 )
+            {
+                timeout = TimeSpan.FromMinutes(temp);
+            }
             var task = Task.Factory.StartNew(() => WaitForReadyImpl(subscriptionId, base64EncodedCert, serviceName, slotName));
 
-            if (!task.Wait(waitTime))
+            if (!task.Wait(timeout))
             {
-                throw new TimeoutException(string.Format("The Task timed out in {0} minutes!", waitTime.TotalMinutes));
+                throw new TimeoutException(string.Format("The Task timed out in {0} minutes!", timeout.TotalMinutes));
             }
         }
 
