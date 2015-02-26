@@ -227,6 +227,10 @@ namespace AzureMgtCmd
                 }
             }
 
+            if (result == null)
+            {
+                throw new ApplicationException(string.Format("cannot find certificate info from  *.publishsettings under folder:{0} for subscription id:{1}", System.IO.Directory.GetCurrentDirectory(), subscriptionId));
+            }
             return result;
         }
 
